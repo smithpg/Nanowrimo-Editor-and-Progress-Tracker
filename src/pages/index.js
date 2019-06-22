@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Layout from 'components/layout';
+import Layout from 'layouts/main';
 import Box from 'components/box';
 import IOExample from 'components/io-example';
 import ImageViewer from 'components/ImageViewer';
-import Editor from 'components/Editor';
+import ProgressIndicator from 'components/ProgressIndicator';
+import Editor from 'components/editor';
 // import Modal from 'containers/modal';
 import { graphql } from 'gatsby';
 
@@ -44,10 +45,6 @@ class Index extends Component {
     // Check localstorage for writing in progress
     // if (localstorage.inProgress) {
     // }
-
-    window.addEventListener('mousedown', () => {
-      this.setWordCount(this.state.wordCount + 10);
-    });
   }
 
   render() {
@@ -55,7 +52,7 @@ class Index extends Component {
       allImageSharp: { nodes },
     } = this.props.data;
 
-    const { currentImageIndex } = this.state;
+    const { currentImageIndex, nextMilestone, wordCount } = this.state;
 
     let currentImage = nodes[currentImageIndex].fluid;
 
@@ -64,7 +61,15 @@ class Index extends Component {
         <div className="ImageViewerWrapper">
           <ImageViewer fluid={currentImage} />;
         </div>
-        <div className="EditorWrapper">{/* <Editor /> */}</div>
+        <div className="EditorWrapper">
+          <Editor setWordCount={this.setWordCount} />
+        </div>
+        <div className="ProgressIndicatorWrapper">
+          <ProgressIndicator
+            nextMilestone={nextMilestone}
+            wordCount={wordCount}
+          />
+        </div>
       </Layout>
     );
   }
