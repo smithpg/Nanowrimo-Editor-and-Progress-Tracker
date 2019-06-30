@@ -13,6 +13,7 @@ const Container = styled.div`
     height: 100%;
 
     background: black;
+    position: relative;
   }
 
   .EditorWrapper {
@@ -30,12 +31,22 @@ const Container = styled.div`
   }
 
   .ProgressIndicatorWrapper {
-    position: fixed;
-    top: 10px;
-    left: 10px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding: 10px;
+    border: 1px dotted white;
 
     color: white;
     text-shadow: 1px 1px 3px black;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+
+    aside {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 `;
 

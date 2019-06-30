@@ -9,10 +9,16 @@ import Editor from 'components/editor';
 // import Modal from 'containers/modal';
 import { graphql } from 'gatsby';
 
+import { MILESTONE_INCREMENT } from 'constants/logic';
+
 class Index extends Component {
   constructor(props) {
     super(props);
-    this.state = { currentImageIndex: 0, nextMilestone: 100, wordCount: 0 };
+    this.state = {
+      currentImageIndex: 0,
+      nextMilestone: MILESTONE_INCREMENT,
+      wordCount: 0,
+    };
   }
 
   newImage = () => {
@@ -34,7 +40,7 @@ class Index extends Component {
 
       this.setState({
         wordCount: newCount,
-        nextMilestone: nextMilestone + 100, //
+        nextMilestone: nextMilestone + MILESTONE_INCREMENT, //
       });
     } else {
       this.setState({ wordCount: newCount });
@@ -59,16 +65,16 @@ class Index extends Component {
     return (
       <Layout>
         <div className="ImageViewerWrapper">
+          <div className="ProgressIndicatorWrapper">
+            <ProgressIndicator
+              nextMilestone={nextMilestone}
+              wordCount={wordCount}
+            />
+          </div>
           <ImageViewer fluid={currentImage} />;
         </div>
         <div className="EditorWrapper">
           <Editor setWordCount={this.setWordCount} />
-        </div>
-        <div className="ProgressIndicatorWrapper">
-          <ProgressIndicator
-            nextMilestone={nextMilestone}
-            wordCount={wordCount}
-          />
         </div>
       </Layout>
     );
@@ -83,7 +89,7 @@ Index.propTypes = {
 
 export const query = graphql`
   query imageQuery {
-    allImageSharp {
+    allImageSharp(filter: { fluid: { src: { regex: "/jpg/" } } }) {
       nodes {
         fluid {
           ...GatsbyImageSharpFluid_tracedSVG
