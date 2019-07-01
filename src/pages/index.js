@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Layout from 'layouts/main';
-import Box from 'components/box';
-import IOExample from 'components/io-example';
 import ImageViewer from 'components/ImageViewer';
 import ProgressIndicator from 'components/ProgressIndicator';
 import Editor from 'components/editor';
-// import Modal from 'containers/modal';
 import { graphql } from 'gatsby';
 
 import { MILESTONE_INCREMENT } from 'constants/logic';
@@ -34,7 +31,6 @@ class Index extends Component {
 
     // Every time we alter the word count,
     // we need to check if a new milestone has been reached ...
-
     if (newCount >= nextMilestone) {
       this.newImage(); // Milestones rewarded w/ new image
 
@@ -46,12 +42,6 @@ class Index extends Component {
       this.setState({ wordCount: newCount });
     }
   };
-
-  componentDidMount() {
-    // Check localstorage for writing in progress
-    // if (localstorage.inProgress) {
-    // }
-  }
 
   render() {
     const {
@@ -87,6 +77,7 @@ Index.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
+// Query gets all images except for the one .png file in /images dir
 export const query = graphql`
   query imageQuery {
     allImageSharp(filter: { fluid: { src: { regex: "/jpg/" } } }) {
