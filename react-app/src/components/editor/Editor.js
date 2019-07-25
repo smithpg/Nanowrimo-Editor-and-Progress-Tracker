@@ -1,13 +1,16 @@
-import React, { Component } from 'react';
-import ReactQuill from 'react-quill'; // ES6
-import _ from 'lodash';
+import React, { Component } from "react";
+import ReactQuill from "react-quill"; // ES6
+import _ from "lodash";
 
-import './quill.snow.css';
+import "./quill.snow.css";
 
 export default class Editor extends Component {
   constructor(props) {
     super(props);
-    this.state = { rawText: '', html: null }; // You can also pass a Quill Delta here
+    this.state = { rawText: "", html: null }; // You can also pass a Quill Delta here
+
+    this._editor = null;
+    this.wordCount = 0;
   }
 
   _calcWordCount(text) {
@@ -15,35 +18,39 @@ export default class Editor extends Component {
      * Remove surrounding whitespace, split, then count
      */
 
-    return text.trim().split(' ').length;
+    return text.trim().split(" ").length;
   }
 
-  _update = _.debounce(editor => {
-    const currentTextValue = editor.getText();
+  _update = _.debounce(() => {
+    const currentTextValue = this._editor.getText();
 
     // Update word count
     const newCount = this._calcWordCount(currentTextValue);
     this.props.setWordCount(newCount);
 
     // Save in-progress document to localStorage
-    this.saveToLocalStorage(editor);
+    this._save();
   }, 200);
 
-  saveToLocalStorage = editor => {
+  _save = () => {
     /**
      * Saves in-progress document to localstorage in plaintext
      * and HTML formats
      */
     const { localStorage } = window,
-      { getText, getHTML } = editor;
+      { getText, getHTML } = this._editor;
 
-    localStorage.setItem('plaintext', getText());
-    localStorage.setItem('html', getHTML());
+    localStorage.setItem("plaintext", getText());
+    localStorage.setItem("html", getHTML());
+    localStorage.setItem("wordCount", this.state.wordCount);
   };
 
   attemptToLoadFromLocalStorage = () => {
     if (window.localStorage.html) {
-      this.setState({ html: window.localStorage.html });
+      this.setState({
+        html: window.localStorage.html,
+        wordCount: window.localStorage.wordCount
+      });
     }
   };
 
@@ -54,7 +61,11 @@ export default class Editor extends Component {
      * https://github.com/zenoamaro/react-quill#exports
      */
 
-    this._update(editor);
+    if (!this._editor) {
+      this._editor = editor;
+    }
+
+    this._update();
 
     this.setState({ html: content });
   };
