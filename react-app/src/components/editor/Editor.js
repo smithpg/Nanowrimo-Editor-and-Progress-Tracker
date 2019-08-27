@@ -18,7 +18,9 @@ export default class Editor extends Component {
      * Remove surrounding whitespace, split, then count
      */
 
-    return text.trim().split(" ").length;
+    const split = text.trim().split(/\s/);
+
+    return split[0] === "" ? 0 : split.length;
   }
 
   _update = _.debounce(() => {
@@ -29,8 +31,9 @@ export default class Editor extends Component {
     this.props.setWordCount(newCount);
 
     // Save in-progress document to localStorage
+    console.log("saving");
     this._save();
-  }, 200);
+  }, 100);
 
   _save = () => {
     /**
@@ -60,7 +63,6 @@ export default class Editor extends Component {
      *
      * https://github.com/zenoamaro/react-quill#exports
      */
-
     if (!this._editor) {
       this._editor = editor;
     }

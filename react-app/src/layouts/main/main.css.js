@@ -36,20 +36,25 @@ const Container = styled.div`
 
   .ProgressIndicatorWrapper {
     position: absolute;
-    top: 0px;
+    bottom: 0px;
     left: 0px;
     padding: 10px;
-    border: 1px dotted white;
+    background-color: black;
 
     color: white;
     text-shadow: 1px 1px 3px black;
     z-index: 5;
     width: 100%;
-    height: 100%;
+    height: 10%;
 
-    aside {
-      display: flex;
-      flex-wrap: wrap;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    .word-count {
+      margin: 0.5rem;
+      font-size: 2rem;
+      color: #2bec2b;
     }
   }
 `;

@@ -1,1 +1,0 @@
-export const MILESTONE_INCREMENT = 100;

@@ -4,28 +4,37 @@ import Layout from "./layouts/main/main";
 import ProgressIndicator from "./components/ProgressIndicator";
 import Editor from "./components/editor/Editor";
 
-import { MILESTONE_INCREMENT } from "./constants/logic";
-import imagesJson from "./constants/images";
+import { MILESTONE_INCREMENT, API_URL } from "./constants";
 
-const imagePaths = imagesJson;
+const imageGenerator = (async function* createImageGenerator() {
+  let imageUrls = [],
+    pageNumber = 1;
+  while (true) {
+    imageUrls = await fetch(`${API_URL}/${pageNumber}`).then(res => res.json());
+
+    while (imageUrls.length > 0) {
+      yield imageUrls.pop();
+    }
+
+    pageNumber++;
+  }
+})();
 
 class Index extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentImageIndex: 0,
+      currentImageUrl: null,
       nextMilestone: MILESTONE_INCREMENT,
       wordCount: 0
     };
   }
 
-  newImage = () => {
-    let numImages = imagePaths.length;
+  async getNewImage() {
+    const { value: newImage } = await imageGenerator.next();
 
-    // Pick a new index into nodes array
-    const newIndex = (this.state.currentImageIndex + 1) % numImages;
-    this.setState({ currentImageIndex: newIndex });
-  };
+    this.setState({ currentImageUrl: newImage });
+  }
 
   setWordCount = newCount => {
     const { nextMilestone } = this.state;
@@ -33,32 +42,40 @@ class Index extends Component {
     // Every time we alter the word count,
     // we need to check if a new milestone has been reached ...
     if (newCount >= nextMilestone) {
-      this.newImage(); // Milestones rewarded w/ new image
+      this.getNewImage(); // Milestones rewarded w/ new image
 
       this.setState({
         wordCount: newCount,
-        nextMilestone: nextMilestone + MILESTONE_INCREMENT //
+        nextMilestone:
+          Math.ceil(newCount / MILESTONE_INCREMENT) * MILESTONE_INCREMENT
       });
     } else {
       this.setState({ wordCount: newCount });
     }
   };
 
+  componentDidMount() {
+    this.getNewImage();
+  }
   render() {
-    const { currentImageIndex, nextMilestone, wordCount } = this.state;
-
-    let currentImage = imagePaths[currentImageIndex].path;
+    const { currentImageUrl, nextMilestone, wordCount } = this.state;
 
     return (
       <Layout>
         <div className="ImageViewerWrapper">
-          <div className="ProgressIndicatorWrapper">
-            <ProgressIndicator
-              nextMilestone={nextMilestone}
-              wordCount={wordCount}
+          <ProgressIndicator
+            nextMilestone={nextMilestone}
+            wordCount={wordCount}
+          />
+          {!currentImageUrl ? (
+            "Loading..."
+          ) : (
+            <img
+              src={currentImageUrl}
+              style={{ height: "100%", width: "100%", objectFit: "cover" }}
+              alt="A source of inspiration"
             />
-          </div>
-          <img src={currentImage} alt="" />
+          )}
         </div>
         <div className="EditorWrapper">
           {window && <Editor setWordCount={this.setWordCount} />}
