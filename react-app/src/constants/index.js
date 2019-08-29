@@ -1,5 +1,5 @@
 // ENDPOINTS
-export const API_URL = "http://li1134-195.members.linode.com:3000";
+export const API_URL = "https://smithpg.xyz";
 
 // LOGIC
 export const MILESTONE_INCREMENT = 100;
