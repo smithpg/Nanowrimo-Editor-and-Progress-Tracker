@@ -17,8 +17,12 @@ export default class Editor extends Component {
     /**
      * Remove surrounding whitespace, split, then count
      */
+    // debugger;
 
-    const split = text.trim().split(/\s/);
+    const split = text
+      .trim()
+      .split(/\s/)
+      .filter(str => str !== "");
 
     return split[0] === "" ? 0 : split.length;
   }
