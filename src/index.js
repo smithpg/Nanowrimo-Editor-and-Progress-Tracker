@@ -6,20 +6,6 @@ import Editor from "./components/editor/Editor";
 
 import { MILESTONE_INCREMENT, API_URL } from "./constants";
 
-const imageGenerator = (async function* createImageGenerator() {
-  let imageUrls = [],
-    pageNumber = 1;
-  while (true) {
-    imageUrls = await fetch(`${API_URL}/${pageNumber}`).then(res => res.json());
-
-    while (imageUrls.length > 0) {
-      yield imageUrls.pop();
-    }
-
-    pageNumber++;
-  }
-})();
-
 class Index extends Component {
   constructor(props) {
     super(props);
@@ -31,9 +17,19 @@ class Index extends Component {
   }
 
   async getNewImage() {
-    const { value: newImage } = await imageGenerator.next();
+    const newImage = await this.getRandomUnsplashImage("nature");
 
     this.setState({ currentImageUrl: newImage });
+  }
+
+  getRandomUnsplashImage(searchTerm) {
+    return fetch(
+      "https://source.unsplash.com/1600x900/?" + searchTerm,
+      {}
+    ).then(res => {
+      console.log(res);
+      return res.url;
+    });
   }
 
   setWordCount = newCount => {
