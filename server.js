@@ -19,4 +19,6 @@ https
     },
     app
   )
-  .listen(443, err => err ? console.error(err) : console.log("Listening on port 443...");
+  .listen(443, err =>
+    err ? console.error(err) : console.log("Listening on port 443...")
+  );
