@@ -13,6 +13,7 @@
 client/build
 
 # misc
+*.db
 /.env
 .env
 .DS_Store
