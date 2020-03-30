@@ -18,31 +18,37 @@ apiRouter.get("/user", async (req, res, next) => {
     res.send(userInfo);
 })
 
-apiRouter.route("/document/:document_id")
-    .get(async (req, res, next) => {
+apiRouter.post("/document", (req, res, next) => {
+    // Create new document
+    const docOpts = req.body;
+
+    Document.create(docOpts).then(createdDoc => {
+        res.json(createdDoc.get)
+    });
+})
+
+apiRouter
+    .param("document_id", async (req, res, next, docId) => {
         try {
-            const foundDocument = await Document.findByPk(document_id);
-            res.send(foundDocument);
+            req.retrievedDocument = await Document.findByPk(docId);
+            next();
         } catch (error) {
-            next(error);
+            next(error)
         }
     })
+    .route("/document/:document_id")
+    .get(async (req, res, next) => {
+        res.json(req.retrievedDocument);
+    })
     .put(async (req, res, next) => {
-
-
         const update = req.body;
 
+        // Apply update to document instance
+        Object.assign(req.retrievedDocument, update);
+        await req.retrievedDocument.save();
 
-        try {
-            const foundDocument = await Document.findByPk(document_id);
-
-            foundDocument.update(update)
-
-            res.send(foundDocument);
-        } catch (error) {
-            next(error);
-        }
-
+        // Respond with updated document
+        res.json(req.retrievedDocument);
     })
 
 
