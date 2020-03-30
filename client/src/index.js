@@ -10,10 +10,16 @@ class Index extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: null,
       currentImageUrl: null,
       nextMilestone: MILESTONE_INCREMENT,
       wordCount: 0
     };
+  }
+
+  componentWillMount() {
+    // Fetch user details from server
+    fetch('/api/user').then(res => res.json()).then(parsed => this.setState({ user: parsed }))
   }
 
   async getNewImage() {
@@ -66,12 +72,12 @@ class Index extends Component {
           {!currentImageUrl ? (
             "Loading..."
           ) : (
-            <img
-              src={currentImageUrl}
-              style={{ height: "100%", width: "100%", objectFit: "cover" }}
-              alt="A source of inspiration"
-            />
-          )}
+              <img
+                src={currentImageUrl}
+                style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                alt="A source of inspiration"
+              />
+            )}
         </div>
         <div className="EditorWrapper">
           {window && <Editor setWordCount={this.setWordCount} />}
