@@ -8,6 +8,7 @@ const apiRouter = require("../../routers/api")
 
 // Create app
 const app = express();
+app.use(express.json())
 
 // Mock req.user 
 app.use((req, res, next) => {
@@ -23,37 +24,39 @@ app.use((req, res, next) => {
 
 app.use(apiRouter);
 
+
 describe("API router", () => {
-    beforeEach(initializeDb)
+    let documentId;
+    beforeEach(async () => {
+        documentId = await initializeDb();
+    })
 
-    it("should respond to requests", function () {
+    describe("`/user/` route", () => {
+        it("should respond to GET requests", function () {
 
-        return request(app)
-            .get("/user")
-            .expect("Content-Type", /json/)
-            .expect(200)
+            return request(app)
+                .get("/user")
+                .expect("Content-Type", /json/)
+                .expect(200)
+        })
+    })
+
+    describe("`/documents/:document_id` route", () => {
+        it("should respond to GET requests with JSON", function () {
+
+            return request(app)
+                .get("/document/" + documentId)
+                .expect("Content-Type", /json/)
+                .expect(200)
+        })
+        it("should respond to PUT requests with JSON", () => {
+            return request(app)
+                .put("/document/" + documentId)
+                .send({ title: "Stuff", content: "things" })
+                .set('Accept', 'application/json')
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .then(res => console.log(res.body))
+        })
     })
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
