@@ -1,9 +1,7 @@
 require("dotenv").config();
+process.env.IS_LOCAL = true;
 
-const fs = require("fs");
-const path = require("path");
 const express = require("express");
-const https = require("https");
 const app = express();
 const session = require("express-session");
 
@@ -16,33 +14,23 @@ const {
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
-    cookie: { maxAge: 60000, secure: true },
+    cookie: { maxAge: 60000, secure: false },
     resave: false,
     saveUninitialized: false
   })
 );
 require("./config/passport")(app); // Init passport, create auth routes, etc.
 
-app.use(express.static(path.join(__dirname, "client/build")));
-
 app.use("/nanowrimo/api", errorOnUnauthenticated, apiRouter);
 
 app.use("/nanowrimo", redirectIfUnauthenticated, (req, res, next) => {
-  res.sendFile(path.join(__dirname, "client/build/index.html"));
+  res.redirect("http://localhost:300");
 });
 
 app.use("*", (err, req, res, next) => {
   console.error(err);
 });
 
-https
-  .createServer(
-    {
-      key: fs.readFileSync(process.env.CERT_KEY),
-      cert: fs.readFileSync(process.env.CERT)
-    },
-    app
-  )
-  .listen(443, err =>
-    err ? console.error(err) : console.log("Listening on port 443...")
-  );
+app.listen(3000, err =>
+  err ? console.error(err) : console.log("Listening on port 3000...")
+);
