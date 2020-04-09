@@ -36,16 +36,19 @@ module.exports = function(app) {
   );
 
   passport.serializeUser((user, done) => {
-    console.log(`Serializing this: ${user.get("googleId")}`);
-
     done(null, user.get("googleId"));
   });
 
   passport.deserializeUser((userGoogleId, done) => {
-    // Retrieve user from database
-    const user = User.findOne({ where: { googleId: userGoogleId } });
+    // DEBUG
+    console.log(
+      `Received a request from auth'd user w/ google id = ${userGoogleId}`
+    );
 
-    done(null, user);
+    // Retrieve user from database
+    const user = User.findOne({
+      where: { googleId: userGoogleId }
+    }).then(user => done(null, user));
   });
 
   // Set up passport middleware
@@ -64,8 +67,6 @@ module.exports = function(app) {
     "/nanowrimo/auth/google/callback",
     passport.authenticate("google"),
     (req, res, next) => {
-      console.log("about to redirect to home");
-
       res.redirect("/nanowrimo");
     }
   );
