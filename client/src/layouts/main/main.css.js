@@ -2,11 +2,25 @@ import React from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
-  display: flex;
-  align-items: stretch;
-
   height: 100vh;
   overflow: hidden;
+
+  header {
+    height: 50px;
+    width: 100%;
+    background: white;
+    z-index: 10;
+  }
+
+  .ListView {
+    margin: 0px auto;
+    max-width: 800px;
+  }
+
+  .EditorView {
+    display: flex;
+    height: calc(100vh - 50px);
+  }
 
   .ImageViewerWrapper {
     width: 50%;

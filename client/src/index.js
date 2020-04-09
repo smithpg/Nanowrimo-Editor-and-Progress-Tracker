@@ -1,90 +1,108 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useHistory
+} from "react-router-dom";
 import ReactDOM from "react-dom";
 import Layout from "./layouts/main/main";
-import ProgressIndicator from "./components/ProgressIndicator";
-import Editor from "./components/editor/Editor";
+import EditorView from "./views/Editor";
 
-import { MILESTONE_INCREMENT, API_URL } from "./constants";
+function App() {
+  let [user, setUser] = useState(null);
 
-class Index extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: null,
-      currentImageUrl: null,
-      nextMilestone: MILESTONE_INCREMENT,
-      wordCount: 0
+  useEffect(() => {
+    // Attempt to fetch user data from backend
+    fetch("http://localhost:3000/nanowrimo/api/user", {
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(parsed => setUser(parsed))
+      .catch(error => console.log(error));
+  }, []);
+
+  return (
+    <Layout>
+      <header>
+        <h1>NaNoWriMo</h1>
+        <ul>
+          <li>{user ? user.email : null}</li>
+        </ul>
+      </header>
+
+      <Router>
+        <Switch>
+          <Route exact path={"/"}>
+            <div className="ListView">
+              <NewDocumentButton />
+              <ul>
+                {user &&
+                  user.documents.map(doc => (
+                    <DocumentListItem document={doc} key={doc.id} />
+                  ))}
+              </ul>
+            </div>
+          </Route>
+
+          <Route path={"/editor/:documentId"}>
+            <EditorView />
+          </Route>
+        </Switch>
+      </Router>
+    </Layout>
+  );
+
+  function DocumentListItem({ document }) {
+    const history = useHistory();
+    const style = {
+      height: "300px",
+      width: "200px",
+      textAlign: "center",
+      margin: "0.5rem",
+      boxShadow: "1px 1px 3px rgba(0,0,0,0.4)",
+      color: "black",
+      padding: "5px 10px",
+      cursor: "pointer"
     };
-  }
-
-  componentWillMount() {
-    // Fetch user details from server
-    fetch('/api/user').then(res => res.json()).then(parsed => this.setState({ user: parsed }))
-  }
-
-  async getNewImage() {
-    const newImage = await this.getRandomUnsplashImage("nature");
-
-    this.setState({ currentImageUrl: newImage });
-  }
-
-  getRandomUnsplashImage(searchTerm) {
-    return fetch(
-      "https://source.unsplash.com/1600x900/?" + searchTerm,
-      {}
-    ).then(res => {
-      console.log(res);
-      return res.url;
-    });
-  }
-
-  setWordCount = newCount => {
-    const { nextMilestone } = this.state;
-
-    // Every time we alter the word count,
-    // we need to check if a new milestone has been reached ...
-    if (newCount >= nextMilestone) {
-      this.getNewImage(); // Milestones rewarded w/ new image
-
-      this.setState({
-        wordCount: newCount,
-        nextMilestone:
-          Math.ceil(newCount / MILESTONE_INCREMENT) * MILESTONE_INCREMENT
-      });
-    } else {
-      this.setState({ wordCount: newCount });
+    function onClick(e) {
+      history.push("/editor/" + document.id);
     }
-  };
-
-  componentDidMount() {
-    this.getNewImage();
-  }
-  render() {
-    const { currentImageUrl, nextMilestone, wordCount } = this.state;
 
     return (
-      <Layout>
-        <div className="ImageViewerWrapper">
-          <ProgressIndicator
-            nextMilestone={nextMilestone}
-            wordCount={wordCount}
-          />
-          {!currentImageUrl ? (
-            "Loading..."
-          ) : (
-              <img
-                src={currentImageUrl}
-                style={{ height: "100%", width: "100%", objectFit: "cover" }}
-                alt="A source of inspiration"
-              />
-            )}
-        </div>
-        <div className="EditorWrapper">
-          {window && <Editor setWordCount={this.setWordCount} />}
-        </div>
-      </Layout>
+      <li style={style} onClick={onClick}>
+        <h1>{document.title}</h1>
+        <p>{document.content}</p>
+      </li>
+    );
+  }
+
+  function NewDocumentButton() {
+    const history = useHistory();
+
+    function onClickNewDocument(e) {
+      // Retrieve the document from the server
+      fetch("http://localhost:3000/nanowrimo/api/document", {
+        credentials: "include",
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Untitled",
+          content: ""
+        })
+      })
+        .then(res => res.json())
+        .then(parsed => {
+          history.push("/editor/" + parsed.id);
+        });
+    }
+
+    return (
+      <div>
+        <button onClick={onClickNewDocument}>New Document</button>
+      </div>
     );
   }
 }
 
-ReactDOM.render(<Index />, document.querySelector("#root"));
+ReactDOM.render(<App />, document.querySelector("#root"));
