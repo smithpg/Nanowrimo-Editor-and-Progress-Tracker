@@ -12,6 +12,12 @@ const {
 } = require("./middleware/auth");
 
 app.use(
+  "*",
+  require("cors")({ origin: "http://localhost:3001", credentials: true })
+);
+
+app.use(express.json());
+app.use(
   session({
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 60000, secure: false },
@@ -24,7 +30,7 @@ require("./config/passport")(app); // Init passport, create auth routes, etc.
 app.use("/nanowrimo/api", errorOnUnauthenticated, apiRouter);
 
 app.use("/nanowrimo", redirectIfUnauthenticated, (req, res, next) => {
-  res.redirect("http://localhost:300");
+  res.redirect("http://localhost:3001");
 });
 
 app.use("*", (err, req, res, next) => {
